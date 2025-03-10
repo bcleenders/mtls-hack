@@ -1,0 +1,26 @@
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: nginx-conf
+#   namespace: frontend
+# data:
+#   nginx.conf: |
+#     user nginx;
+#     worker_processes  1;
+#     events {
+#       worker_connections  10240;
+#     }
+#     http {
+#       server {
+#         listen       3000;
+#         server_name  localhost;
+#         root         /static;
+#         location = /index.html { }
+#       }
+#     }
+#   welcome.html: |
+#     <html>
+#       <body>
+#         <h1>Hello, world!</h1>
+#       </body>
+#     </html>

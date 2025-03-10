@@ -85,3 +85,11 @@ kubectl exec -it $(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l a
     -- /opt/spire/bin/spire-agent api fetch -socketPath /run/spire/sockets/agent.sock
 ```
 
+## Run Envoy instances with mTLS
+
+Following [Configure Envoy to Perform X.509 SVID Authentication
+](https://github.com/spiffe/spire-tutorials/blob/main/k8s/envoy-x509/README.md).
+
+```bash
+kubectl apply -k service-workload/frontend/
+```
