@@ -17,5 +17,5 @@ generatorOptions:
 
 resources:
 - namespace.yaml
-- envoy.yaml
+- deployment.yaml
 - service.yaml
