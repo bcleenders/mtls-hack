@@ -6,6 +6,17 @@ Goal:
 - [ ] Call natively (curl or gRPC) to Envoy
 - [ ] OIDC integration with Envoy?
 
+## Keeping me sane
+
+<details>
+<summary>Environment setup</summary>
+```
+apt update
+git config --global core.editor "vim
+apt install -y fzf curl
+echo "source /usr/share/doc/fzf/examples/key-bindings.bash" >> ~/.bashrc; source ~/.bashrc
+```
+<details>
 
 ## Minikube cluster running SPIRE
 
@@ -92,4 +103,25 @@ Following [Configure Envoy to Perform X.509 SVID Authentication
 
 ```bash
 kubectl apply -k service-workload/frontend/
+```
+
+Iterating quickly:
+
+```bash
+kubectl apply -f service-workload/test-pod.yaml
+
+# Frontend
+kubectl apply -k service-workload/frontend/
+kubectl rollout restart deployment -n frontend
+kubectl -n default exec -ti test-pod -- curl http://frontend.frontend.svc.cluster.local
+
+# Backend
+kubectl apply -k service-workload/backend/
+kubectl rollout restart deployment -n backend
+kubectl -n default exec -ti test-pod -- curl http://backend.backend.svc.cluster.local
+kubectl -n frontend logs -f -l app=frontend -c frontend
+
+# Frontend calling backend
+# This goes: user -> frontend Envoy -> frontend nginx -(proxy_pass)-> backend Envoy -> backend nginx
+kubectl -n default exec -ti test-pod -- curl http://frontend.frontend.svc.cluster.local/backend/
 ```

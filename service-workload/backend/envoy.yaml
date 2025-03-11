@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: envoy
+        image: envoyproxy/envoy:v1.25.1
+        imagePullPolicy: Always
+        args: ["-l", "debug", "--local-address-ip-version", "v4", "-c", "/run/envoy/envoy.yaml", "--base-id", "1"]
+        volumeMounts:
+        - name: envoy-config
+          mountPath: "/run/envoy"
+          readOnly: true 
+        - name: spire-agent-socket
+          mountPath: /run/spire/sockets
+          readOnly: true          
+
+      - name: backend
+        imagePullPolicy: IfNotPresent
+        image: nginx
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: html-conf
+              mountPath: /usr/share/nginx/html
+              readOnly: true      
+
+      volumes:
+      - name: envoy-config
+        configMap:
+          name: backend-envoy
+      - name: spire-agent-socket
+        hostPath:
+          path: /run/spire/sockets
+          type: DirectoryOrCreate
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+      - name: html-conf
+        configMap:
+          name: html-conf
+          items:
+            - key: index.html
+              path: index.html
