@@ -12,13 +12,15 @@ Goal:
 
 <details>
 <summary>Environment setup</summary>
+
 ```
 apt update
 git config --global core.editor "vim
 apt install -y fzf curl
 echo "source /usr/share/doc/fzf/examples/key-bindings.bash" >> ~/.bashrc; source ~/.bashrc
 ```
-<details>
+
+</details>
 
 ## Minikube cluster running SPIRE
 
