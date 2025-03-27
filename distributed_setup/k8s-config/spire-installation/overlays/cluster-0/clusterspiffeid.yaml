@@ -1,0 +1,17 @@
+#
+# This defines "auto-registration" of new workloads.
+# Spiffe registrations are done automatically for workloads that match the pod selector (but not others).
+# This relies on the spiffe-controller-manager
+#
+apiVersion: spire.spiffe.io/v1alpha1
+kind: ClusterSPIFFEID
+metadata:
+  name: cluster-0-spiffeid
+spec:
+  spiffeIDTemplate: "spiffe://{{ .TrustDomain }}/ns/{{ .PodMeta.Namespace }}/sa/{{ .PodSpec.ServiceAccountName }}"
+  autoPopulateDNSNames: true
+  podSelector:
+    matchLabels:
+      spiffe.io/spiffe-id: "true"
+  federatesWith:
+    - cluster-1.k8s.spire.cxcc.nl

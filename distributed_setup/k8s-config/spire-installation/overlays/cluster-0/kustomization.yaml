@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- clusterspiffeid.yaml
+
+configMapGenerator:
+- name: spire-agent
+  namespace: spire
+  files:
+    - config/agent.conf
+- name: spire-server
+  namespace: spire
+  files:
+    - config/server.conf
+- name: spire-controller-manager-config
+  namespace: spire
+  files:
+    - config/spire-controller-manager-config.yaml
+
+# This stops adding suffixes to configmap names.
+# Be sure to reload config (i.e. restart pods) - kustomize won't do it for us!
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+# - path: deployment-dev.yaml
+# - path: service-dev.yaml
