@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: spire-server
+  namespace: spire
+  labels:
+    app: spire-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spire-server
+  serviceName: spire-server
+  template:
+    metadata:
+      namespace: spire
+      labels:
+        app: spire-server
+    spec:
+      serviceAccountName: spire-server
+      containers:
+        - name: spire-server
+          image: ghcr.io/spiffe/spire-server:1.11.2
+          args:
+            - -config
+            - /run/spire/config/server.conf
+          ports:
+            - containerPort: 8081
+            - containerPort: 8443  # federation
+          volumeMounts:
+            - name: spire-config
+              mountPath: /run/spire/config
+              readOnly: true
+            - name: spire-data
+              mountPath: /run/spire/data
+              readOnly: false
+            - name: spire-server-socket
+              mountPath: /tmp/spire-server/private
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 8080
+            failureThreshold: 6
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+        - name: spire-controller-manager
+          image: ghcr.io/spiffe/spire-controller-manager:0.6.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9443
+            - containerPort: 8083
+              name: healthz
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: healthz
+          args:
+          - "--config=spire-controller-manager-config.yaml"
+          volumeMounts:
+            - name: spire-server-socket
+              mountPath: /spire-server
+              readOnly: true
+            - name: spire-controller-manager-config
+              mountPath: /spire-controller-manager-config.yaml
+              subPath: spire-controller-manager-config.yaml
+      volumes:
+        - name: spire-config
+          configMap:
+            name: spire-server
+        - name: spire-server-socket
+          emptyDir: {}
+        - name: spire-controller-manager-config
+          configMap:
+            name: spire-controller-manager-config
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+    - metadata:
+        name: spire-data
+        namespace: spire
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

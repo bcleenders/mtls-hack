@@ -1,1 +1,7 @@
 spire-tutorials/
+
+distributed_setup/terraform/.data
+distributed_setup/terraform/.terraform
+
+.tmp
+

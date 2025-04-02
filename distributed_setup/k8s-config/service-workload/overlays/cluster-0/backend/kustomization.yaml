@@ -1,0 +1,21 @@
+configMapGenerator:
+- name: backend-envoy
+  namespace: backend
+  files:
+    - config/envoy.yaml
+- name: nginx-conf
+  namespace: backend
+  files:
+    - config/nginx.conf
+- name: html-conf
+  namespace: backend
+  files:
+    - config/index.html
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+- namespace.yaml
+- deployment.yaml
+- service.yaml
